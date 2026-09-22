@@ -1,6 +1,24 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { X } from 'lucide-react';
+
+const LEGAL_CONTENT: Record<string, { title: string; body: string }> = {
+  privacy: {
+    title: 'Privacy Register',
+    body: "We collect the information you submit through our BOQ and enquiry forms (name, company, contact details, and project notes) solely to respond to your request and provide quotes or technical support. We do not sell your data to third parties. [Replace this paragraph with your actual data-handling practices before publishing — this is placeholder text, not a reviewed legal policy.]",
+  },
+  compliance: {
+    title: 'Compliance Matrix',
+    body: 'Our panels are manufactured to meet the standards referenced across this site (e.g. IS:710, ASTM D1037). [Replace this section with your verified certification numbers, issuing bodies, and links to actual test reports before publishing — claims of ISO or ASTM compliance should be backed by real, checkable documentation.]',
+  },
+  warranty: {
+    title: 'Warranty Certificate Terms',
+    body: '[Add your real warranty terms here — coverage period, what is and is not covered, and the claims process. This placeholder exists so the link is honest rather than a dead end, but it should not go live with generic text.]',
+  },
+};
 
 export const Footer: React.FC = () => {
+  const [openLegal, setOpenLegal] = useState<keyof typeof LEGAL_CONTENT | null>(null);
+
   return (
     <footer
       className="w-full bg-[#0d0e0f] border-t border-[#343536] text-white"
@@ -125,23 +143,23 @@ export const Footer: React.FC = () => {
         {/* Legal bar */}
         <div className="pt-8 flex flex-col md:flex-row items-center justify-between gap-4 text-[#c3c7cb]">
           <div className="font-micro-tag text-[9px] uppercase tracking-wider text-center md:text-left">
-            © 2025 KRYSTAPLY CLUB SHIELD™ CORPORATION. ALL SPECIFICATIONS REGISTERED &amp; TRADEMARKED.
+            © {new Date().getFullYear()} KRYSTAPLY CLUB SHIELD™ CORPORATION. ALL SPECIFICATIONS REGISTERED &amp; TRADEMARKED.
           </div>
           <div className="flex items-center gap-6 font-micro-tag text-[9px] uppercase tracking-wider">
             <button
-              onClick={() => alert('Viewing Privacy Register (ISO-27001 data compliance)')}
+              onClick={() => setOpenLegal('privacy')}
               className="hover:text-white transition-colors cursor-pointer"
             >
               Privacy Register
             </button>
             <button
-              onClick={() => alert('Viewing Timber Chain of Custody Compliance Matrix')}
+              onClick={() => setOpenLegal('compliance')}
               className="hover:text-white transition-colors cursor-pointer"
             >
               Compliance Matrix
             </button>
             <button
-              onClick={() => alert('Viewing Manufacturer Warranty Certificate Terms & Conditions')}
+              onClick={() => setOpenLegal('warranty')}
               className="hover:text-white transition-colors cursor-pointer"
             >
               Warranty Certificate Terms
@@ -149,6 +167,33 @@ export const Footer: React.FC = () => {
           </div>
         </div>
       </div>
+
+      {/* Legal content modal — replaces the old fake alert() popups */}
+      {openLegal && (
+        <div
+          className="fixed inset-0 z-[60] flex items-center justify-center bg-black/70 backdrop-blur-sm p-4"
+          onClick={() => setOpenLegal(null)}
+        >
+          <div
+            className="max-w-lg w-full bg-[#1b1c1d] border border-[#343536] shadow-2xl p-6 sm:p-8 relative"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              onClick={() => setOpenLegal(null)}
+              className="absolute top-4 right-4 text-[#c3c7cb] hover:text-white"
+              aria-label="Close"
+            >
+              <X className="w-5 h-5" />
+            </button>
+            <h3 className="font-headline-md text-xl font-bold uppercase text-white mb-4">
+              {LEGAL_CONTENT[openLegal].title}
+            </h3>
+            <p className="font-body-sm text-[14px] text-[#c3c7cb] leading-relaxed">
+              {LEGAL_CONTENT[openLegal].body}
+            </p>
+          </div>
+        </div>
+      )}
     </footer>
   );
 };
