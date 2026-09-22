@@ -16,6 +16,28 @@
   </head>
   <body class="bg-[#121314] text-[#e3e2e3] selection:bg-[#d91e18] selection:text-[#ffefed] antialiased">
     <div id="root"></div>
+
+    <!--
+      Hidden static form so Netlify's build-time bot can detect and register
+      the "boq-quote" form. Netlify Forms scans the deployed static HTML for
+      forms at build time, which a pure React/SPA form is invisible to — this
+      stub is what makes real submissions from BOQQuoteSection.tsx actually
+      get delivered. Do not remove, even though it's never rendered visibly.
+    -->
+    <form name="boq-quote" data-netlify="true" netlify-honeypot="bot-field" hidden>
+      <input type="text" name="name" />
+      <input type="text" name="company" />
+      <input type="tel" name="phone" />
+      <input type="email" name="email" />
+      <input type="text" name="city" />
+      <input type="text" name="clientType" />
+      <input type="text" name="product" />
+      <input type="text" name="quantity" />
+      <textarea name="notes"></textarea>
+      <input type="file" name="attachment" />
+      <input type="text" name="bot-field" />
+    </form>
+
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
