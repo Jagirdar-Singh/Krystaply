@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Header } from './components/Header';
-import { CadastralHUD } from './components/CadastralHUD';
+import { QuickQuoteButton } from './components/QuickQuoteButton';
 import { Hero } from './components/Hero';
 import { StrataAnatomy } from './components/StrataAnatomy';
 import { ProductCatalog } from './components/ProductCatalog';
@@ -47,9 +47,6 @@ export default function App() {
 
   return (
     <div className="flex flex-col w-full min-h-screen bg-[#121314] text-[#e3e2e3] font-body-md antialiased selection:bg-[#d91e18] selection:text-[#ffefed]">
-      {/* Floating Cadastral Coordinates HUD */}
-      <CadastralHUD />
-
       {/* Main Navigation Header */}
       <Header onOpenQuote={() => scrollToSection('boq-quote')} />
 
@@ -124,6 +121,9 @@ export default function App() {
 
       {/* Footer */}
       <Footer />
+
+      {/* Floating quick-quote shortcut, appears after scrolling past the hero */}
+      <QuickQuoteButton onOpenQuote={() => scrollToSection('boq-quote')} />
 
       {/* Inspection Spec Modal */}
       <ProductModal
