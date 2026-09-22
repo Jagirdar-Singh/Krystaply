@@ -7,7 +7,7 @@ export const StrataAnatomy: React.FC = () => {
   const activeLayer = STRATA_LAYERS.find((l) => l.id === selectedLayerId) || STRATA_LAYERS[0];
 
   return (
-    <section className="w-full bg-[#171717] py-20 border-t border-[#343536]/50 text-white">
+    <section id="technology" className="w-full bg-[#171717] py-20 border-t border-[#343536]/50 text-white">
       <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
         {/* Section Header */}
         <motion.div
