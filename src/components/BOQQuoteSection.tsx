@@ -1,16 +1,22 @@
 import React, { useState } from 'react';
-import { Phone, Mail, MessageSquare, Check, Paperclip } from 'lucide-react';
+import { Phone, Mail, MessageSquare, Check, Paperclip, Loader2, AlertCircle } from 'lucide-react';
 
 interface BOQQuoteSectionProps {
   initialProduct?: string;
   initialThickness?: string;
 }
 
+// TODO: replace with your real WhatsApp Business number (digits only, country code, no + or spaces)
+const WHATSAPP_NUMBER = '18005797827';
+
 export const BOQQuoteSection: React.FC<BOQQuoteSectionProps> = ({
   initialProduct = 'Club Shield Marine Ply (BWP 710)',
   initialThickness = '',
 }) => {
   const [submitted, setSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
+  const [attachment, setAttachment] = useState<File | null>(null);
   const [formData, setFormData] = useState({
     name: '',
     company: '',
@@ -21,7 +27,6 @@ export const BOQQuoteSection: React.FC<BOQQuoteSectionProps> = ({
     product: initialProduct,
     quantity: '',
     notes: initialThickness ? `Specified thickness: ${initialThickness}` : '',
-    fileName: '',
   });
 
   // Keep product updated if initialProduct changes
@@ -37,15 +42,34 @@ export const BOQQuoteSection: React.FC<BOQQuoteSectionProps> = ({
     }
   }, [initialProduct, initialThickness]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  // Submits to Netlify Forms (see the hidden "boq-quote" form stub in index.html).
+  // Netlify intercepts POSTs to "/" that include a matching form-name and
+  // routes the data to your Netlify dashboard + email notifications.
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSubmitted(true);
+    setSubmitError(null);
+    setSubmitting(true);
+
+    const body = new FormData();
+    body.append('form-name', 'boq-quote');
+    Object.entries(formData).forEach(([key, value]) => body.append(key, value));
+    if (attachment) body.append('attachment', attachment);
+
+    try {
+      const response = await fetch('/', { method: 'POST', body });
+      if (!response.ok) throw new Error(`Submission failed (${response.status})`);
+      setSubmitted(true);
+    } catch (err) {
+      setSubmitError(
+        "Couldn't send your request — please check your connection and try again, or use the direct line/email on the right."
+      );
+    } finally {
+      setSubmitting(false);
+    }
   };
 
-  const handleFileSim = () => {
-    const fakeNames = ['Hospitality_Millwork_Schedule_v2.xlsx', 'Villa_Penthouse_BOQ.pdf', 'Joinery_Details_Section.dwg'];
-    const chosen = fakeNames[Math.floor(Math.random() * fakeNames.length)];
-    setFormData((prev) => ({ ...prev, fileName: chosen }));
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setAttachment(e.target.files?.[0] ?? null);
   };
 
   return (
@@ -89,7 +113,19 @@ export const BOQQuoteSection: React.FC<BOQQuoteSectionProps> = ({
                 </button>
               </div>
             ) : (
-              <form onSubmit={handleSubmit} className="space-y-4">
+              <form
+                onSubmit={handleSubmit}
+                name="boq-quote"
+                data-netlify="true"
+                netlify-honeypot="bot-field"
+                className="space-y-4"
+              >
+                <input type="hidden" name="form-name" value="boq-quote" />
+                <p className="hidden">
+                  <label>
+                    Don't fill this out if you're human: <input name="bot-field" />
+                  </label>
+                </p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div>
                     <label className="font-micro-tag text-[9px] text-[#c3c7cb] uppercase block mb-1">
@@ -125,7 +161,7 @@ export const BOQQuoteSection: React.FC<BOQQuoteSectionProps> = ({
                     <input
                       type="tel"
                       required
-                      placeholder="+91 98765 43210"
+                      placeholder="+1 (555) 123-4567"
                       value={formData.phone}
                       onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
                       className="w-full bg-[#1f2021] p-3 font-body-sm text-[13px] text-[#e3e2e3] border border-[#343536] focus:border-[#f6bd4e] outline-none"
@@ -224,32 +260,49 @@ export const BOQQuoteSection: React.FC<BOQQuoteSectionProps> = ({
                   />
                 </div>
 
-                {/* File Attachment Simulation */}
+                {/* File Attachment */}
                 <div className="p-3 bg-[#1f2021] border border-[#343536] flex flex-col sm:flex-row items-center justify-between gap-3">
-                  <div className="flex items-center gap-2 text-[#c3c7cb] font-body-sm text-[13px]">
-                    <Paperclip className="w-4 h-4 text-[#f6bd4e]" />
-                    {formData.fileName ? (
-                      <span className="text-[#f6bd4e] font-mono text-xs">
-                        Attached: {formData.fileName}
+                  <div className="flex items-center gap-2 text-[#c3c7cb] font-body-sm text-[13px] min-w-0">
+                    <Paperclip className="w-4 h-4 text-[#f6bd4e] shrink-0" />
+                    {attachment ? (
+                      <span className="text-[#f6bd4e] font-mono text-xs truncate">
+                        Attached: {attachment.name}
                       </span>
                     ) : (
                       <span>Attach BOQ or Drawing (.PDF, .XLSX, .DWG):</span>
                     )}
                   </div>
-                  <button
-                    type="button"
-                    onClick={handleFileSim}
-                    className="px-3 py-1.5 bg-[#292a2b] hover:bg-[#343536] text-[10px] font-label-caps uppercase text-[#e3e2e3] border border-[#343536] cursor-pointer"
-                  >
-                    {formData.fileName ? 'Change File' : 'Browse Files'}
-                  </button>
+                  <label className="px-3 py-1.5 bg-[#292a2b] hover:bg-[#343536] text-[10px] font-label-caps uppercase text-[#e3e2e3] border border-[#343536] cursor-pointer shrink-0">
+                    {attachment ? 'Change File' : 'Browse Files'}
+                    <input
+                      type="file"
+                      name="attachment"
+                      accept=".pdf,.xlsx,.dwg,.doc,.docx"
+                      onChange={handleFileChange}
+                      className="hidden"
+                    />
+                  </label>
                 </div>
+
+                {submitError && (
+                  <div className="flex items-start gap-2 p-3 bg-[#2a1414] border border-[#93000a] text-[#ffb4ab] font-body-sm text-[13px]">
+                    <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
+                    <span>{submitError}</span>
+                  </div>
+                )}
 
                 <button
                   type="submit"
-                  className="w-full py-4 bg-[#d91e18] hover:bg-[#c00007] text-white font-headline-sm text-[11px] uppercase tracking-wider transition-colors font-bold shadow-xl cursor-pointer"
+                  disabled={submitting}
+                  className="w-full py-4 bg-[#d91e18] hover:bg-[#c00007] disabled:opacity-60 disabled:cursor-not-allowed text-white font-headline-sm text-[11px] uppercase tracking-wider transition-colors font-bold shadow-xl cursor-pointer flex items-center justify-center gap-2"
                 >
-                  [+] Submit BOQ Specification Request
+                  {submitting ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" /> Sending Request...
+                    </>
+                  ) : (
+                    <>[+] Submit BOQ Specification Request</>
+                  )}
                 </button>
               </form>
             )}
@@ -291,13 +344,16 @@ export const BOQQuoteSection: React.FC<BOQQuoteSectionProps> = ({
               <p className="font-body-sm text-[13px] text-[#c3c7cb] mt-1 leading-relaxed">
                 Quick stock availability and dispatch updates for contractors and project managers on site.
               </p>
-              <button
-                type="button"
-                onClick={() => alert('Connecting with Krystaply WhatsApp Technical Desk...')}
+              <a
+                href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(
+                  'Hi, I have a question about Krystaply Club Shield plywood.'
+                )}`}
+                target="_blank"
+                rel="noopener noreferrer"
                 className="mt-3 text-[11px] font-label-caps uppercase text-[#d91e18] hover:underline font-bold block cursor-pointer"
               >
                 [+] Message on WhatsApp
-              </button>
+              </a>
             </div>
           </div>
         </div>
