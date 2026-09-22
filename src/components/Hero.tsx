@@ -45,8 +45,8 @@ export const Hero: React.FC<HeroProps> = ({
         transition={{ delay: 0.4, duration: 0.8 }}
         className="absolute top-28 left-8 z-10 hidden md:block font-micro-tag text-[9px] text-[#c3c7cb] tracking-widest leading-relaxed"
       >
-        GRID REF: KP-09-X // CALIBRATION 1:1<br />
-        TOLERANCE ±0.02MM // COMPOSITE STRATA
+        ISO 9001:2015 CERTIFIED<br />
+        THICKNESS TOLERANCE ±0.15MM
       </motion.div>
 
       <motion.div
@@ -55,8 +55,8 @@ export const Hero: React.FC<HeroProps> = ({
         transition={{ delay: 0.5, duration: 0.8 }}
         className="absolute top-28 right-8 z-10 hidden md:block text-right font-micro-tag text-[9px] text-[#f6bd4e] tracking-widest leading-relaxed"
       >
-        SPEC SYSTEM: SHIELD-CORE-V3<br />
-        STATUS: SPECIFICATION ACTIVE
+        PAN-INDIA DEALER NETWORK<br />
+        DISPATCH WITHIN 48 HOURS
       </motion.div>
 
       <div className="relative z-20 max-w-[1440px] w-full mx-auto px-4 sm:px-6 lg:px-8 py-16 flex flex-col justify-center">
